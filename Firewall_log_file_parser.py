@@ -1,11 +1,11 @@
 import mysql.connector
 from mysql.connector import errorcode
 
-
+#connecting to mysql database
 def ConnectToDB():
     try:
         cnx = mysql.connector.connect(user='root', password='P@ssw0rd',
-                                      host='192.168.84.133', database='SIEM')
+                                      host='10.0.0.2', database='SIEM')
         return cnx, cnx.cursor(buffered=True)
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -20,7 +20,7 @@ def ConnectToDB():
 
 cnx, cursor = ConnectToDB()
 
-
+#creating a dictionary from an existing log file
 def DicFromLogLine(path):
     #creates dic from log
     open_file = open(path, 'r')
@@ -41,7 +41,7 @@ def DicFromLogLine(path):
     return log_dic
 
 
-
+#defining known and unknown port protocols
 def PortNumToProtocol(num):
     PORTS = {'21': 'FTP', '22': 'SSH', '23': 'TELNET', '25': 'SMTP', '67': 'DHCP', '53': 'DNS', '80': 'HTTP', '445'
     : 'SMB', '443': 'HTTPS'}
@@ -53,7 +53,7 @@ def PortNumToProtocol(num):
 
 
 
-
+#inserting the log information into the database
 def InsertToDB(log, cnx, cursor):
     add_log = ("""INSERT INTO fwlogs (ID, DATE, SRC_IP, DST_IP, PORT, PROTOCOL, ACTION) VALUES (NULL, %(DATE)s, %(SRC_IP)s, %(DST_IP)s, %(PORT)s, %(PROTOCOL)s, %(ACTION)s)""")
     cursor.execute(add_log, log)
@@ -64,11 +64,7 @@ def main():
 
     log = 'Ping_Sweep.txt'
     DicFromLogLine(log)
-    #print PortNumToProtocol('53')
-
     ConnectToDB()
-    #InsertToDB(DicFromLogLine('Ping_Sweep.txt'),cnx,cursor)
-
 
 
 if __name__ == '__main__':
